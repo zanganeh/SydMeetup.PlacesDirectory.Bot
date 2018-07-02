@@ -1,7 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Bot.Builder.Dialogs;
+﻿using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using SydMeetup.PlacesDirectory.Bot.IntentProviders;
+using SydMeetup.PlacesDirectory.Bot.LUIS;
+using System;
+using System.Threading.Tasks;
 
 namespace SydMeetup.PlacesDirectory.Bot.Dialogs
 {
@@ -15,16 +17,30 @@ namespace SydMeetup.PlacesDirectory.Bot.Dialogs
             return Task.CompletedTask;
         }
 
-        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
-            var activity = await result as Activity;
+            var message = await result;
 
-            // Calculate something for us to return
-            int length = (activity.Text ?? string.Empty).Length;
+            IIntentProvider intentProvider = new NoProvider();
 
-            // Return our reply to the user
-            await context.PostAsync($"You sent {activity.Text} which was {length} characters");
+            var response = await LUISProvider.GetEntityFromLUIS(message.Text);
 
+            if (response.TopScoringIntent != null)
+            {
+                switch (response.TopScoringIntent.Intent)
+                {
+                    case "Places.GetHours":
+                        intentProvider = new GetHourProvider(new Connector.CmsConnector());
+                        break;
+
+                    case "Places.GetAddress":
+                        intentProvider = new GetAddressProvider(new Connector.CmsConnector());
+                        break;
+                }
+            }
+
+            var providerResult = await intentProvider.Execute(response.Entities);
+            await context.PostAsync(providerResult);
             context.Wait(MessageReceivedAsync);
         }
     }
