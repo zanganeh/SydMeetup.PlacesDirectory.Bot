@@ -27,14 +27,20 @@ namespace SydMeetup.PlacesDirectory.Bot.Dialogs
 
             if (response.TopScoringIntent != null)
             {
+                var cmsConnector = new Connector.CmsConnector();
+
                 switch (response.TopScoringIntent.Intent)
                 {
                     case "Places.GetHours":
-                        intentProvider = new GetHourProvider(new Connector.CmsConnector());
+                        intentProvider = new GetHourProvider(cmsConnector);
                         break;
 
                     case "Places.GetAddress":
-                        intentProvider = new GetAddressProvider(new Connector.CmsConnector());
+                        intentProvider = new GetAddressProvider(cmsConnector);
+                        break;
+
+                    case "Places.List":
+                        intentProvider = new GetListProvider(cmsConnector);
                         break;
                 }
             }

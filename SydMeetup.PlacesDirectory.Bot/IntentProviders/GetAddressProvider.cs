@@ -21,9 +21,9 @@ namespace SydMeetup.PlacesDirectory.Bot.IntentProviders
 
             if (placeName != null)
             {
+                var place = (await _cmsConnector.GetPlace(placeName))?.Results?.FirstOrDefault();
 
-                var resturant = (await _cmsConnector.GetResturant(placeName))?.Results?.FirstOrDefault();
-                return resturant?.Address?.ValueString;
+                return place?.Address?.ValueString;
             }
 
             return null;

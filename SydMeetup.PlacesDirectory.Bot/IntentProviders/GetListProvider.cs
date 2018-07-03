@@ -1,29 +1,28 @@
 ﻿using SydMeetup.PlacesDirectory.Bot.Connector;
 using SydMeetup.PlacesDirectory.Bot.LUIS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace SydMeetup.PlacesDirectory.Bot.IntentProviders
 {
-    public class GetHourProvider : IIntentProvider
+    public class GetListProvider : IIntentProvider
     {
         private readonly CmsConnector _cmsConnector;
 
-        public GetHourProvider(CmsConnector cmsConnector)
+        public GetListProvider(CmsConnector cmsConnector)
         {
             _cmsConnector = cmsConnector;
         }
 
         public async Task<string> Execute(IEnumerable<EntityType> entities)
         {
-            var placeName = entities.FirstOrDefault(a => a.Type == "Places.PlaceName")?.Entity;
+            var places = await _cmsConnector.GetPlaces();
 
-            if (placeName != null)
+            if (places != null && places.Results != null && places.Results.Any())
             {
-                var place = (await _cmsConnector.GetPlace(placeName))?.Results?.FirstOrDefault();
-
-                return place?.TradingHours?.ValueString;
+                return $"I have bellow places:{Environment.NewLine} {string.Join(Environment.NewLine, places.Results.Select(a => a.Name))}";
             }
 
             return null;

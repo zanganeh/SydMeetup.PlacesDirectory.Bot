@@ -7,7 +7,7 @@ using Microsoft.Bot.Connector;
 
 namespace SydMeetup.PlacesDirectory.Bot
 {
-    //[BotAuthentication]
+    [BotAuthentication]
     public class MessagesController : ApiController
     {
         /// <summary>
