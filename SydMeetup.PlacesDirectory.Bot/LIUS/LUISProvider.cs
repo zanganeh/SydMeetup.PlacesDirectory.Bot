@@ -8,13 +8,13 @@ namespace SydMeetup.PlacesDirectory.Bot.LUIS
 {
     public class LUISProvider
     {
-        public static async Task<LUISResponse> GetEntityFromLUIS(string Query)
+        public static async Task<LUISResponse> GetEntityFromLUIS(string query)
         {
-            Query = Uri.EscapeDataString(Query);
+            query = Uri.EscapeDataString(query);
             LUISResponse Data = new LUISResponse();
             using (HttpClient client = new HttpClient())
             {
-                var congetiveServiceUrl = $"{WebConfigurationManager.AppSettings["congetiveServiceUrl"]}&q={Query}";
+                var congetiveServiceUrl = $"{WebConfigurationManager.AppSettings["congetiveServiceUrl"]}&q={query}";
                 var msg = await client.GetAsync(congetiveServiceUrl);
 
                 if (msg.IsSuccessStatusCode)
