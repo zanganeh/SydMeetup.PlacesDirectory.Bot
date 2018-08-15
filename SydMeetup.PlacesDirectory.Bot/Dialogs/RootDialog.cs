@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace SydMeetup.PlacesDirectory.Bot.Dialogs
 {
     [Serializable]
-    public class RootDialog : IDialog<object>
+    ///IDialog<string></string>
+    public class RootDialog : IDialog<string>
     {
         public Task StartAsync(IDialogContext context)
         {
@@ -19,8 +20,18 @@ namespace SydMeetup.PlacesDirectory.Bot.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
-            var message = await result;
+            var userMessage = await result;
 
+            var providerResult = await ProcessUserMessage(userMessage);
+
+            //Post a message to be sent to the user, using previous messages to establish a conversation context.
+            await context.PostAsync(providerResult);
+
+            context.Wait(MessageReceivedAsync);
+        }
+
+        private static async Task<string> ProcessUserMessage(IMessageActivity message)
+        {
             IIntentProvider intentProvider = new NoProvider();
 
             var response = await LUISProvider.GetEntityFromLUIS(message.Text);
@@ -46,8 +57,7 @@ namespace SydMeetup.PlacesDirectory.Bot.Dialogs
             }
 
             var providerResult = await intentProvider.Execute(response.Entities);
-            await context.PostAsync(providerResult);
-            context.Wait(MessageReceivedAsync);
+            return providerResult;
         }
     }
 }
